@@ -1,0 +1,15 @@
+(define (list-length lst)
+  (if (null? lst)
+      0
+      (+ 1 (list-length (cdr lst)))))
+
+(define (contains? lst x)
+  (if (null? lst)
+      #f
+      (if ( equal? (car lst) x) #t (contains? (cdr lst) x))))
+
+(define (reverse-list lst)
+  (define (helper current result)
+    (if (null? current) result
+        (helper (cdr current) (cons (car current) result))))
+  (helper lst '()))
