@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "tree.h"
 
 using std::string;
 

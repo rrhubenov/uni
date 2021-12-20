@@ -1,5 +1,5 @@
 main: hierarchy.o main.o
-	g++ -o main -std=c++11 hierarchy.o main.o
+	g++ -o main -std=c++11 hierarchy.o main.o 
 
 run: main
 	./main
