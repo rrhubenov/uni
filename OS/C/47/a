@@ -1,0 +1,5 @@
+input: uint32_t, 4 bytes       
+file size(file) % 4 = 0
+max file size = 400mil bytes = ~400MB
+
+available ram: 256MB, disk size: 8GB
