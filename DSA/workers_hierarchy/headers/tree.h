@@ -1,17 +1,16 @@
 #pragma once
 #include <forward_list>
 #include <stack>
+#include <iostream>
 
 using namespace std;
 
 template <class T>
 class Tree {
     private:
-        T* data;
-        int height;
+        const T data;
         int size;
 
-        Tree* parent;
         forward_list<Tree*>* children;
 
         class Iterator {
@@ -20,36 +19,44 @@ class Tree {
                 Tree* tree;
                 stack<Tree*> dfsstack;
 
-                Iterator(Tree& tree): tree(tree) {}
+                Iterator(Tree* tree): tree(tree) {}
 
             public:
-                const T& operator*() const {
-                    return tree->data;
+                const Tree& operator*() const {
+                    assert(tree != nullptr);
+                    return *tree;
                 }
 
-                T& operator*() {
-                    return tree->data;
+                Tree& operator*() {
+                    assert(tree != nullptr);
+                    return *tree;
                 }
 
-                const T* operator->() const {
-                    return tree->data;
+                const Tree* operator->() const {
+                    assert(tree != nullptr);
+                    return this->tree;
                 }
 
-                T* operator->() {
-                    return tree->data;
+                Tree* operator->() {
+                    assert(tree != nullptr);
+                    return this->tree;
                 }
 
-                Iterator& operator++() {
+                Iterator operator++() {
+                    assert(tree != nullptr);
                     // This typename confuses me quite a bit
-                    for(typename forward_list<Tree*>::iterator it = tree->children.begin(); it != tree->children.end(); ++it) {
-                        dfsstack.push(*it);
+                    if(tree->children != nullptr) {
+                        for(typename forward_list<Tree*>::iterator it = tree->children->begin(); it != tree->children->end(); ++it) {
+                            dfsstack.push(*it);
+                        }
                     }
                     if(dfsstack.empty()) {
-                        return nullptr;
+                        tree = nullptr;
                     } else {
-                        tree = dfsstack.pop();
-                        return this;
+                        tree = dfsstack.top();
+                        dfsstack.pop();
                     }
+                    return *this;
                 }
 
                 Iterator operator++(int) {
@@ -57,25 +64,79 @@ class Tree {
                     ++(*this);
                     return res;
                 }
+
+                bool operator==(Iterator other) {
+                    return other.tree == this->tree;
+                }
+
+                bool operator!=(Iterator other) {
+                    return !(*this == other);
+                }
         };
 
+        void increaseSize() {
+            size++;
+        }
     public:
 
-        Tree(T& root) {
-            this->data = root;
-        };
+        Tree(const T& data): data(data), size(1), children(nullptr) {};
 
-        void insert(const T& toInsert , const T& parent);
-        const Tree& search(const T& toFind);
-
-        int children_count();
-        const Tree& get_parent();
-
-        Iterator begin() const {
-            return Iterator(&data);
+        void insertNode(const T& toInsert , const T& parent) {
+            Tree tree_parent = search(parent);
+            tree_parent.addToChildren(new Tree(toInsert));
         }
 
-        Iterator end() const {
+        const Tree& search(const T& toFind) {
+            for(Tree<T>::Iterator it = begin(); it != end(); ++it) {
+                if(*it == toFind) {
+                    return *it;
+                }
+            }
+
+            throw runtime_error("Element not found");
+        }
+
+        int children_count() {
+            int count;
+
+            if(children == nullptr) {
+                count = 0;
+            } else {
+                for(typename forward_list<T>::iterator it = children->begin(); it != children->end; ++it) {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        Iterator begin() {
+            return Iterator(this);
+        }
+
+        Iterator end() {
             return Iterator(nullptr);
+        }
+
+        void addToChildren(Tree* tree) {
+            if(children == nullptr) {
+                children = new forward_list<Tree*>;
+            }
+            children->push_front(tree);
+            cout << "Wut";
+        }
+
+        const T& getData() {
+            return data;
+        }
+
+        bool operator==(Tree other) {
+            return data == other.data;
+        }
+
+        void print() {
+            for(Tree<T>::Iterator it = begin(); it != end(); ++it) {
+                cout << it->getData() << endl;
+            }
         }
 };
