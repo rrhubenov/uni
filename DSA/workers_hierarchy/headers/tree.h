@@ -9,7 +9,6 @@ template <class T>
 class Tree {
     private:
         const T data;
-        int size;
 
         forward_list<Tree*>* children;
 
@@ -34,12 +33,12 @@ class Tree {
 
                 const Tree* operator->() const {
                     assert(tree != nullptr);
-                    return this->tree;
+                    return tree;
                 }
 
                 Tree* operator->() {
                     assert(tree != nullptr);
-                    return this->tree;
+                    return tree;
                 }
 
                 Iterator operator++() {
@@ -74,21 +73,19 @@ class Tree {
                 }
         };
 
-        void increaseSize() {
-            size++;
-        }
     public:
 
-        Tree(const T& data): data(data), size(1), children(nullptr) {};
+        Tree(const T& data): data(data), children(nullptr) {};
 
         void insertNode(const T& toInsert , const T& parent) {
-            Tree tree_parent = search(parent);
-            tree_parent.addToChildren(new Tree(toInsert));
+            //TODO: Check if toInsert already exists
+            Tree& tree_parent = search(parent);
+            tree_parent.addChild(new Tree(toInsert));
         }
 
-        const Tree& search(const T& toFind) {
+        Tree& search(const T& toFind) {
             for(Tree<T>::Iterator it = begin(); it != end(); ++it) {
-                if(*it == toFind) {
+                if(it->getData() == toFind) {
                     return *it;
                 }
             }
@@ -118,12 +115,11 @@ class Tree {
             return Iterator(nullptr);
         }
 
-        void addToChildren(Tree* tree) {
+        void addChild(Tree* tree) {
             if(children == nullptr) {
                 children = new forward_list<Tree*>;
             }
             children->push_front(tree);
-            cout << "Wut";
         }
 
         const T& getData() {
