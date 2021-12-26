@@ -11,6 +11,7 @@ class Tree {
         const T data;
         Tree* parent;
         unsigned size = 1;
+        unsigned height = 1;
 
         forward_list<Tree*>* children;
 
@@ -157,7 +158,11 @@ class Tree {
         typedef Iterator iterator;
         typedef ConstIterator const_iterator;
 
-        Tree(const T& data, Tree* parent): data(data), parent(parent), children(nullptr) {};
+        Tree(const T& data, Tree* parent): data(data), parent(parent), children(nullptr) {
+            if(this->parent != nullptr) {
+                this->height = this->parent->height + 1;
+            }
+        };
 
         void insertNode(const T& toInsert , const T& parent) {
             //TODO: Check if toInsert already exists
@@ -231,6 +236,14 @@ class Tree {
             return size;
         }
 
+        const unsigned getHeight() const {
+            return height;
+        }
+
+        const unsigned getHeight() {
+            return height;
+        }
+
         const Tree* getParent() const {
             return this->parent;
         }
@@ -259,12 +272,18 @@ class Tree {
             delete &tree;
         }
 
-        void print() const {
+        string print() const {
+            string output;
             for(Tree<T>::const_iterator it = cbegin(); it != cend(); ++it) {
                 if(it->getParent() != nullptr) {
-                    cout << it->getParent()->getData() << "-" << it->getData() << " size: " << it->getSize() << endl;
+                    output.append(it->getParent()->getData());
+                    output.append("-");
+                    output.append(it->getData());
+                    output.append("\n");
                 }
             }
+
+            return output;
         }
 
         bool operator<(Tree& other) {

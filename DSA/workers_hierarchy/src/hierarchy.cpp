@@ -15,7 +15,29 @@ Hierarchy::Hierarchy(const Hierarchy& r) {
 }
 
 Hierarchy::Hierarchy(const string& data) {
-    //TODO
+    string line;
+    string delimeter = "-";
+
+    for(string::const_iterator it = data.cbegin(); it != data.cend(); ++it) {
+        // Will not parse correctly if last char is not a '\n'
+        // Eg. last line might not have a new line
+        if(*it == ' ') {
+            throw exception();
+        }
+        else if(*it == '\n') {
+            string boss = line.substr(0, line.find(delimeter));
+            string worker = line.substr(line.find(delimeter)+1, line.length());
+            try {
+                tree.insertNode(worker, boss);
+            } catch(...) {
+                // TODO
+            }
+
+            line = "";
+        } else {
+            line.push_back(*it);
+        }
+    }
 }
 
 Hierarchy::~Hierarchy() noexcept {
@@ -24,11 +46,19 @@ Hierarchy::~Hierarchy() noexcept {
 }
 
 string Hierarchy::print() const {
-    return "";
+    return tree.print();
 }
 
 int Hierarchy::longest_chain() const {
-    return 3;
+    unsigned max = 0;
+
+    for(Tree<string>::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
+        if(it->getHeight() > max) {
+            max = it->getHeight();
+        }
+    }
+
+    return max;
 }
 
 bool Hierarchy::find(const string& name) const {
@@ -83,6 +113,8 @@ bool Hierarchy::fire(const string& who) {
 }
 
 bool Hierarchy::hire(const string& who, const string& boos) {
+    //TODO: return false is can't hire
+    tree.insertNode(who, boos);
     return true;
 }
 
