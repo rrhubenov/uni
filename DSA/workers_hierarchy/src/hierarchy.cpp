@@ -15,18 +15,27 @@ Hierarchy::Hierarchy(const Hierarchy& r) {
 }
 
 Hierarchy::Hierarchy(const string& data) {
+    //TODO: There can be white spaces around the delim. See tests.cpp line 91
     string line;
     string delimeter = "-";
 
     for(string::const_iterator it = data.cbegin(); it != data.cend(); ++it) {
-        // Will not parse correctly if last char is not a '\n'
-        // Eg. last line might not have a new line
-        if(*it == ' ') {
-            throw exception();
-        }
-        else if(*it == '\n') {
+        if(*it == '\n') {
+            if(line.find('-') == string::npos) {
+                throw exception();
+            }
+
             string boss = line.substr(0, line.find(delimeter));
             string worker = line.substr(line.find(delimeter)+1, line.length());
+            boss.erase(0, boss.find_first_not_of(' '));
+            boss.erase(boss.find_last_not_of(' ') + 1);
+            worker.erase(0, worker.find_first_not_of(' '));
+            worker.erase(worker.find_last_not_of(' ') + 1);
+
+            if(boss.find(' ') != string::npos || worker.find(' ') != string::npos) {
+                throw exception();
+            }
+
             try {
                 tree.insertNode(worker, boss);
             } catch(...) {
@@ -62,16 +71,24 @@ int Hierarchy::longest_chain() const {
 }
 
 bool Hierarchy::find(const string& name) const {
-    try{
-        tree.search(name);
-        return true;
-    } catch(...) {
+    if(tree.getSize() == 1) {
         return false;
+    } else {
+        try{
+            tree.search(name);
+            return true;
+        } catch(...) {
+            return false;
+        }
     }
 }
 
 int Hierarchy::num_employees() const {
-    return tree.getSize();
+    if(tree.getSize() == 1) {
+        return 0;
+    } else {
+        return tree.getSize();
+    }
 }
 
 int Hierarchy::num_overloaded(int level) const {
@@ -87,7 +104,11 @@ int Hierarchy::num_overloaded(int level) const {
 string Hierarchy::manager(const string& name) const {
     for(Tree<string>::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
         if(it->getData() == name) {
-            return it->getParent()->getData();
+            if(it->getParent() == nullptr) {
+                return "";
+            } else {
+                return it->getParent()->getData();
+            }
         }
     }
     // TODO: Should there be exception checking?
