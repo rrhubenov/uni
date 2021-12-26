@@ -1,6 +1,6 @@
 #pragma once
 #include <forward_list>
-#include <stack>
+#include <queue>
 #include <iostream>
 
 using namespace std;
@@ -9,16 +9,38 @@ template <class T>
 class Tree {
     private:
         const T data;
+        Tree* parent;
+        unsigned size = 1;
 
         forward_list<Tree*>* children;
+
+        void addChild(Tree* tree) {
+            if(children == nullptr) {
+                children = new forward_list<Tree*>;
+            }
+            children->push_front(tree);
+        }
+
+        void increaseSize(unsigned value) {
+            size += value;
+            Tree* next_parent = parent;
+            while(next_parent != nullptr) {
+                next_parent->size += value;
+                next_parent = next_parent->parent;
+            }
+        }
 
         class Iterator {
             friend class Tree;
             private:
                 Tree* tree;
-                stack<Tree*> dfsstack;
+                queue<Tree*> bfsqueue;
 
                 Iterator(Tree* tree): tree(tree) {}
+
+                static bool sort_func(const Tree* t1, const Tree* t2)  {
+                    return t1->getData() < t2->getData();
+                }
 
             public:
                 const Tree& operator*() const {
@@ -45,15 +67,16 @@ class Tree {
                     assert(tree != nullptr);
                     // This typename confuses me quite a bit
                     if(tree->children != nullptr) {
+                        tree->children->sort(sort_func);
                         for(typename forward_list<Tree*>::iterator it = tree->children->begin(); it != tree->children->end(); ++it) {
-                            dfsstack.push(*it);
+                            bfsqueue.push(*it);
                         }
                     }
-                    if(dfsstack.empty()) {
+                    if(bfsqueue.empty()) {
                         tree = nullptr;
                     } else {
-                        tree = dfsstack.top();
-                        dfsstack.pop();
+                        tree = bfsqueue.front();
+                        bfsqueue.pop();
                     }
                     return *this;
                 }
@@ -71,20 +94,81 @@ class Tree {
                 bool operator!=(Iterator other) {
                     return !(*this == other);
                 }
+        }; 
+
+        class ConstIterator {
+            friend class Tree;
+            private:
+                const Tree* tree;
+                queue<Tree*> bfsqueue;
+
+                ConstIterator(const Tree* tree): tree(tree) {}
+
+                static bool sort_func(const Tree* t1, const Tree* t2)  {
+                    return t1->getData() < t2->getData();
+                }
+
+            public:
+                const Tree& operator*() const {
+                    assert(tree != nullptr);
+                    return *tree;
+                }
+
+                const Tree* operator->() const {
+                    assert(tree != nullptr);
+                    return tree;
+                }
+
+                ConstIterator operator++() {
+                    assert(tree != nullptr);
+                    // This typename confuses me quite a bit
+                    if(tree->children != nullptr) {
+                        tree->children->sort(sort_func);
+                        for(typename forward_list<Tree*>::iterator it = tree->children->begin(); it != tree->children->end(); ++it) {
+                            bfsqueue.push(*it);
+                        }
+                    }
+                    if(bfsqueue.empty()) {
+                        tree = nullptr;
+                    } else {
+                        tree = bfsqueue.front();
+                        bfsqueue.pop();
+                    }
+                    return *this;
+                }
+
+                ConstIterator operator++(int) {
+                    Iterator res(*this);
+                    ++(*this);
+                    return res;
+                }
+
+                bool operator==(ConstIterator other) {
+                    return other.tree == this->tree;
+                }
+
+                bool operator!=(ConstIterator other) {
+                    return !(*this == other);
+                }
         };
 
     public:
 
-        Tree(const T& data): data(data), children(nullptr) {};
+        typedef Iterator iterator;
+        typedef ConstIterator const_iterator;
+
+        Tree(const T& data, Tree* parent): data(data), parent(parent), children(nullptr) {};
 
         void insertNode(const T& toInsert , const T& parent) {
             //TODO: Check if toInsert already exists
             Tree& tree_parent = search(parent);
-            tree_parent.addChild(new Tree(toInsert));
+            tree_parent.addChild(new Tree(toInsert, &tree_parent));
+
+            tree_parent.increaseSize(1);
         }
 
         Tree& search(const T& toFind) {
-            for(Tree<T>::Iterator it = begin(); it != end(); ++it) {
+            for(Tree<T>::iterator it = begin(); it != end(); ++it) {
                 if(it->getData() == toFind) {
                     return *it;
                 }
@@ -93,13 +177,21 @@ class Tree {
             throw runtime_error("Element not found");
         }
 
-        int children_count() {
-            int count;
+        const Tree& search(const T& toFind) const {
+            for(Tree<T>::const_iterator it = cbegin(); it != cend(); ++it) {
+                if(it->getData() == toFind) {
+                    return *it;
+                }
+            }
 
-            if(children == nullptr) {
-                count = 0;
-            } else {
-                for(typename forward_list<T>::iterator it = children->begin(); it != children->end; ++it) {
+            throw runtime_error("Element not found");
+        }
+
+        int children_count() const {
+            int count = 0;
+
+            if(children != nullptr) {
+                for(typename forward_list<Tree*>::iterator it = children->begin(); it != children->end(); ++it) {
                     count++;
                 }
             }
@@ -107,32 +199,88 @@ class Tree {
             return count;
         }
 
-        Iterator begin() {
+        iterator begin() {
             return Iterator(this);
         }
 
-        Iterator end() {
+        iterator end() {
             return Iterator(nullptr);
         }
 
-        void addChild(Tree* tree) {
-            if(children == nullptr) {
-                children = new forward_list<Tree*>;
-            }
-            children->push_front(tree);
+        const_iterator cbegin() const {
+            return ConstIterator(this);
+        }
+
+        const_iterator cend() const {
+            return ConstIterator(nullptr);
         }
 
         const T& getData() {
             return data;
         }
 
+        const T& getData() const {
+            return data;
+        }
+
+        const unsigned getSize() const {
+            return size;
+        }
+
+        const unsigned getSize() {
+            return size;
+        }
+
+        const Tree* getParent() const {
+            return this->parent;
+        }
+
         bool operator==(Tree other) {
             return data == other.data;
         }
 
-        void print() {
-            for(Tree<T>::Iterator it = begin(); it != end(); ++it) {
-                cout << it->getData() << endl;
+        void remove(const T& toDelete) {
+            assert(toDelete != "Uspeshnia");
+            Tree& tree = search(toDelete);
+            assert(tree.parent != nullptr);
+            assert(tree.parent->children != nullptr);
+
+            tree.parent->children->remove(&tree);
+
+            if(tree.children != nullptr) {
+                for(typename forward_list<Tree*>::iterator it = tree.children->begin(); it != tree.children->end(); ++it) {
+                    (*it)->parent = tree.parent;
+                }
+                tree.parent->children->splice_after(tree.parent->children->begin(), *tree.children);
             }
+
+            tree.parent->increaseSize(-1);
+
+            delete &tree;
+        }
+
+        void print() const {
+            for(Tree<T>::const_iterator it = cbegin(); it != cend(); ++it) {
+                if(it->getParent() != nullptr) {
+                    cout << it->getParent()->getData() << "-" << it->getData() << " size: " << it->getSize() << endl;
+                }
+            }
+        }
+
+        bool operator<(Tree& other) {
+            cout << "Operator called" << endl;
+            return data < other.getData();
+        }
+        
+        bool operator>(Tree& other) {
+            return data > other.getData();
+        }
+
+        bool operator=(Tree& other) {
+            return data == other.getData();
+        }
+
+        bool operator!=(Tree& other) {
+            return data != other.getData();
         }
 };

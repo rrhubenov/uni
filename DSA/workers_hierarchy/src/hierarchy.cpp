@@ -1,4 +1,7 @@
 #include "../headers/interface.h"
+#include <string>
+
+using namespace std;
 
 Hierarchy::Hierarchy(Hierarchy&& r) noexcept {
 
@@ -12,8 +15,7 @@ Hierarchy::Hierarchy(const Hierarchy& r) {
 }
 
 Hierarchy::Hierarchy(const string& data) {
-
-
+    //TODO
 }
 
 Hierarchy::~Hierarchy() noexcept {
@@ -30,30 +32,53 @@ int Hierarchy::longest_chain() const {
 }
 
 bool Hierarchy::find(const string& name) const {
-    return true;
+    try{
+        tree.search(name);
+        return true;
+    } catch(...) {
+        return false;
+    }
 }
 
 int Hierarchy::num_employees() const {
-    return 1;
+    return tree.getSize();
 }
 
 int Hierarchy::num_overloaded(int level) const {
-    return 3;
+    unsigned count = 0;
+    for(Tree<string>::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
+        if(it->getSize() > level) {
+            count++;
+        }
+    }
+    return count;
 }
 
 string Hierarchy::manager(const string& name) const {
-    return "";
+    for(Tree<string>::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
+        if(it->getData() == name) {
+            return it->getParent()->getData();
+        }
+    }
+    // TODO: Should there be exception checking?
+    return "NOT FOUND!";
 }
 
 int Hierarchy::num_subordinates(const string& name) const {
-    return 3;
+    const Tree<string>& worker = tree.search(name);
+    return worker.children_count();
 }
 
 unsigned long Hierarchy::getSalary(const string& who) const {
-    return 3;
+    Tree<string> worker = tree.search(who);
+    unsigned direct_count = worker.children_count();
+    unsigned remaining = worker.getSize() - direct_count;
+
+    return 500*direct_count + 50*remaining;
 }
 
 bool Hierarchy::fire(const string& who) {
+    tree.remove(who);
     return true;
 }
 

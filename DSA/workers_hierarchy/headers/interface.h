@@ -34,5 +34,5 @@ public:
 
     //If you need it - add more public methods here
 private:
-    //Add whatever you need here
+    Tree<string> tree = Tree<string>("Uspeshnia", nullptr);
 };
