@@ -16,6 +16,7 @@ Hierarchy::Hierarchy(const Hierarchy& r) {
 
 Hierarchy::Hierarchy(const string& data) {
     //TODO: There can be white spaces around the delim. See tests.cpp line 91
+    //TODO: Clean up code duplication
     string line;
     string delimeter = "-";
 
@@ -36,16 +37,26 @@ Hierarchy::Hierarchy(const string& data) {
                 throw exception();
             }
 
-            try {
-                tree.insertNode(worker, boss);
-            } catch(...) {
-                // TODO
-            }
+            tree.insertNode(worker, boss);
 
             line = "";
         } else {
             line.push_back(*it);
         }
+    }
+    if(line != "") {
+        string boss = line.substr(0, line.find(delimeter));
+        string worker = line.substr(line.find(delimeter)+1, line.length());
+        boss.erase(0, boss.find_first_not_of(' '));
+        boss.erase(boss.find_last_not_of(' ') + 1);
+        worker.erase(0, worker.find_first_not_of(' '));
+        worker.erase(worker.find_last_not_of(' ') + 1);
+
+        if(boss.find(' ') != string::npos || worker.find(' ') != string::npos) {
+            throw exception();
+        }
+
+        tree.insertNode(worker, boss);
     }
 }
 
@@ -59,6 +70,10 @@ string Hierarchy::print() const {
 }
 
 int Hierarchy::longest_chain() const {
+    if(tree.getSize() == 1) {
+        return 0;
+    }
+
     unsigned max = 0;
 
     for(Tree<string>::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
@@ -116,25 +131,44 @@ string Hierarchy::manager(const string& name) const {
 }
 
 int Hierarchy::num_subordinates(const string& name) const {
-    const Tree<string>& worker = tree.search(name);
-    return worker.children_count();
+    try {
+        const Tree<string>& worker = tree.search(name);
+        return worker.children_count();
+    } catch(...) {
+        return -1;
+    }
 }
 
 unsigned long Hierarchy::getSalary(const string& who) const {
-    Tree<string> worker = tree.search(who);
-    unsigned direct_count = worker.children_count();
-    unsigned remaining = worker.getSize() - direct_count;
+    try {
+        Tree<string> worker = tree.search(who);
+        unsigned direct_count = worker.children_count();
+        unsigned remaining = worker.getSize() - direct_count - 1;
 
-    return 500*direct_count + 50*remaining;
+        return 500*direct_count + 50*remaining;
+    } catch(...) {
+        return -1;
+    }
 }
 
 bool Hierarchy::fire(const string& who) {
-    tree.remove(who);
-    return true;
+    try {
+        if(who == "Uspeshnia") {
+            return false;
+        }
+        tree.remove(who);
+        return true;
+    } catch(runtime_error e) {
+        if(strcmp(e.what(), "Element not found") == 0) {
+            return false;
+        } else {
+            throw e;
+        }
+    }
 }
 
 bool Hierarchy::hire(const string& who, const string& boos) {
-    //TODO: return false is can't hire
+    //TODO: return false if can't hire
     tree.insertNode(who, boos);
     return true;
 }
