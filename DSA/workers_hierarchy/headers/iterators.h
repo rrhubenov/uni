@@ -93,14 +93,16 @@ private:
     stack<DataType *> children_stack;
     queue<DataType *> bfsqueue;
 
-    ReverseIterator(DataType *tree, bool is_end) {
-        if(!is_end) {
+    ReverseIterator(DataType *tree) {
+        if(tree != nullptr) {
             bfsqueue.push(tree);
+            children_stack.push(nullptr);
             children_stack.push(tree);
             while(!bfsqueue.empty()) {
                 DataType* curr = bfsqueue.front();
                 bfsqueue.pop();
                 if(curr->children != nullptr) {
+                    tree->children->sort(sort_func);
                     for (typename forward_list<Tree *>::iterator it = curr->children->begin(); it != curr->children->end(); ++it)
                     {
                         bfsqueue.push(*it);
@@ -111,7 +113,7 @@ private:
             this->tree = children_stack.top();
             children_stack.pop();
         } else {
-            this->tree = tree;
+            this->tree = nullptr;
         }
     }
 
