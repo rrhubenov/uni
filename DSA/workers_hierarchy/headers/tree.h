@@ -165,11 +165,32 @@ class Tree {
         };
 
         void insertNode(const T& toInsert , const T& parent) {
-            //TODO: Check if toInsert already exists
-            Tree& tree_parent = search(parent);
-            tree_parent.addChild(new Tree(toInsert, &tree_parent));
+            //TODO: A lot of refactoring is needed
+            //TODO: If parent does not exists, throw error
+            try {
+                Tree& already_exists = search(toInsert);
 
-            tree_parent.increaseSize(1);
+                assert(already_exists.parent != nullptr);
+                assert(already_exists.parent->children != nullptr);
+
+                already_exists.parent->children->remove(&already_exists);
+                already_exists.parent->increaseSize(-1);
+
+                Tree& new_parent = search(parent);
+                new_parent.addChild(&already_exists);
+                new_parent.increaseSize(1);
+                already_exists.parent = &new_parent;
+
+            } catch(runtime_error e) {
+                if(strcmp(e.what(), "Element not found") == 0) {
+                    Tree& tree_parent = search(parent);
+                    tree_parent.addChild(new Tree(toInsert, &tree_parent));
+
+                    tree_parent.increaseSize(1);
+                } else {
+                    throw e;
+                }
+            }
         }
 
         Tree& search(const T& toFind) {
@@ -263,8 +284,9 @@ class Tree {
             if(tree.children != nullptr) {
                 for(typename forward_list<Tree*>::iterator it = tree.children->begin(); it != tree.children->end(); ++it) {
                     (*it)->parent = tree.parent;
+                    (*it)->height -= 1;
                 }
-                tree.parent->children->splice_after(tree.parent->children->begin(), *tree.children);
+                tree.parent->children->splice_after(tree.parent->children->cbefore_begin(), *tree.children);
             }
 
             tree.parent->increaseSize(-1);
