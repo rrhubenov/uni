@@ -1,5 +1,6 @@
 #include "../headers/interface.h"
 #include <string>
+#include <cassert>
 
 using namespace std;
 
@@ -9,10 +10,7 @@ Hierarchy::Hierarchy(Hierarchy&& r) noexcept {
 }
 
 
-Hierarchy::Hierarchy(const Hierarchy& r) {
-
-
-}
+Hierarchy::Hierarchy(const Hierarchy& r): tree(Tree<string>(r.tree)) {}
 
 Hierarchy::Hierarchy(const string& data) {
     //TODO: There can be white spaces around the delim. See tests.cpp line 91
@@ -182,15 +180,82 @@ bool Hierarchy::hire(const string& who, const string& boos) {
 }
 
 void Hierarchy::incorporate()  {
+    for(Tree<string>::riterator it1 = tree.rbegin(); it1 != tree.rend(); ++it1) {
+        if(it1->children_count() >= 2) {
 
+            forward_list<Tree<string>*>* children = it1->getChildren();
+            Tree<string>* max = children->front();
+            unsigned max_salary = 0;
+            for(forward_list<Tree<string>*>::iterator it2 = children->begin(); it2 != children->end(); ++it2) {
+                unsigned ccount = (*it2)->children_count();
+                unsigned remaining = (*it2)->getSize() - ccount - 1;
+                unsigned salary = 500*ccount + 5*remaining;
+                if(salary > max_salary) {
+                    max_salary = salary;
+                    max = *it2;
+                }
+            }
+
+            forward_list<Tree<string>*> toMove;
+            for(forward_list<Tree<string>*>::iterator it2 = children->begin(); it2 != children->end(); ++it2) {
+                if(*it2 != max) {
+                    toMove.push_front(*it2);
+                }
+            }
+            for(forward_list<Tree<string>*>::iterator it2 = toMove.begin(); it2 != toMove.end(); ++it2) {
+                this->hire((*it2)->getData(), max->getData());
+            }
+
+        }
+    }
 }
 
 void Hierarchy::modernize() {
-
+    for(Tree<string>::riterator it = tree.rbegin(); it != tree.rend(); ++it) {
+        if(it->getHeight() % 2 == 0 && it->children_count() > 0) {
+            this->fire(it->getData());
+        }
+    }
 }
 
 Hierarchy Hierarchy::join(const Hierarchy& right) const {
-    return Hierarchy("");
+    // Копираме лявото дърво
+    // Итерираме през дясното дърво
+    //  За всеки работник от дясното:
+    //      Ако се намира в лявото дърво също:
+    //          добавяме всички деца на работника в дясното дърво в лявото
+    //          Ако имат различни шефове && ако левия е по-ниско в йерархията:
+    //              insertNode(работника, десния шеф)
+    //      Ако не се намира в лявото дърво:
+    //          итерираме през цялото поддърво на работника и вкарваме него и всичките му деца
+    Hierarchy result = Hierarchy(*this);
+    Tree<string>::const_iterator it = right.tree.cbegin();
+    ++it;
+    for(;it != right.tree.cend(); ++it) {
+        if(result.find(it->getData())) {
+            forward_list<Tree<string>*>* children = it->getChildren();
+            if(children != nullptr) {
+                for(forward_list<Tree<string>*>::const_iterator child = children->cbegin(); child != children->cend(); ++child) {
+                    result.hire((*child)->getData(), it->getData());
+                }
+            }
+            const Tree<string>& left_parent = result.tree.search(it->getData());
+            const Tree<string>* right_parent = it->getParent();
+            assert(right_parent != nullptr);
+            if(left_parent.getData() != right_parent->getData() && left_parent.getHeight() > right_parent->getHeight()){
+                result.tree.insertNode(it->getData(), right_parent->getData());
+            } else if(left_parent.getData() != right_parent->getData() && left_parent.getHeight() == right_parent->getHeight()) {
+                if(left_parent.getData() > right_parent->getData()) {
+                    result.tree.insertNode(it->getData(), right_parent->getData());
+                }
+            }
+        } else {
+            for(Tree<string>::const_iterator subtree = it->cbegin(); subtree != it->cend(); ++subtree) {
+                result.hire(it->getData(), it->getParent()->getData());
+            }
+        }
+    }
+    return result;
 }
 
 
