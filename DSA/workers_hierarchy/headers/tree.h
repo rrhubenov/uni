@@ -1,6 +1,7 @@
 #pragma once
 #include <forward_list>
 #include <queue>
+#include <stack>
 #include <iostream>
 
 using namespace std;
@@ -31,132 +32,14 @@ class Tree {
             }
         }
 
-        class Iterator {
-            friend class Tree;
-            private:
-                Tree* tree;
-                queue<Tree*> bfsqueue;
-
-                Iterator(Tree* tree): tree(tree) {}
-
-                static bool sort_func(const Tree* t1, const Tree* t2)  {
-                    return t1->getData() < t2->getData();
-                }
-
-            public:
-                const Tree& operator*() const {
-                    assert(tree != nullptr);
-                    return *tree;
-                }
-
-                Tree& operator*() {
-                    assert(tree != nullptr);
-                    return *tree;
-                }
-
-                const Tree* operator->() const {
-                    assert(tree != nullptr);
-                    return tree;
-                }
-
-                Tree* operator->() {
-                    assert(tree != nullptr);
-                    return tree;
-                }
-
-                Iterator operator++() {
-                    assert(tree != nullptr);
-                    // This typename confuses me quite a bit
-                    if(tree->children != nullptr) {
-                        tree->children->sort(sort_func);
-                        for(typename forward_list<Tree*>::iterator it = tree->children->begin(); it != tree->children->end(); ++it) {
-                            bfsqueue.push(*it);
-                        }
-                    }
-                    if(bfsqueue.empty()) {
-                        tree = nullptr;
-                    } else {
-                        tree = bfsqueue.front();
-                        bfsqueue.pop();
-                    }
-                    return *this;
-                }
-
-                Iterator operator++(int) {
-                    Iterator res(*this);
-                    ++(*this);
-                    return res;
-                }
-
-                bool operator==(Iterator other) {
-                    return other.tree == this->tree;
-                }
-
-                bool operator!=(Iterator other) {
-                    return !(*this == other);
-                }
-        }; 
-
-        class ConstIterator {
-            friend class Tree;
-            private:
-                const Tree* tree;
-                queue<Tree*> bfsqueue;
-
-                ConstIterator(const Tree* tree): tree(tree) {}
-
-                static bool sort_func(const Tree* t1, const Tree* t2)  {
-                    return t1->getData() < t2->getData();
-                }
-
-            public:
-                const Tree& operator*() const {
-                    assert(tree != nullptr);
-                    return *tree;
-                }
-
-                const Tree* operator->() const {
-                    assert(tree != nullptr);
-                    return tree;
-                }
-
-                ConstIterator operator++() {
-                    assert(tree != nullptr);
-                    // This typename confuses me quite a bit
-                    if(tree->children != nullptr) {
-                        tree->children->sort(sort_func);
-                        for(typename forward_list<Tree*>::iterator it = tree->children->begin(); it != tree->children->end(); ++it) {
-                            bfsqueue.push(*it);
-                        }
-                    }
-                    if(bfsqueue.empty()) {
-                        tree = nullptr;
-                    } else {
-                        tree = bfsqueue.front();
-                        bfsqueue.pop();
-                    }
-                    return *this;
-                }
-
-                ConstIterator operator++(int) {
-                    Iterator res(*this);
-                    ++(*this);
-                    return res;
-                }
-
-                bool operator==(ConstIterator other) {
-                    return other.tree == this->tree;
-                }
-
-                bool operator!=(ConstIterator other) {
-                    return !(*this == other);
-                }
-        };
+        #include "iterators.h"
 
     public:
 
-        typedef Iterator iterator;
-        typedef ConstIterator const_iterator;
+        typedef Iterator<Tree> iterator;
+        typedef Iterator<const Tree> const_iterator;
+        typedef ReverseIterator<Tree> riterator;
+        typedef ReverseIterator<const Tree> const_riterator;
 
         Tree(const T& data, Tree* parent): data(data), parent(parent), children(nullptr) {
             if(this->parent != nullptr) {
@@ -226,19 +109,35 @@ class Tree {
         }
 
         iterator begin() {
-            return Iterator(this);
+            return iterator(this);
         }
 
         iterator end() {
-            return Iterator(nullptr);
+            return iterator(nullptr);
         }
 
         const_iterator cbegin() const {
-            return ConstIterator(this);
+            return const_iterator(this);
         }
 
         const_iterator cend() const {
-            return ConstIterator(nullptr);
+            return const_iterator(nullptr);
+        }
+
+        riterator rbegin() {
+            return riterator(this, false);
+        }
+
+        riterator rend() {
+            return riterator(this, true);
+        }
+
+        const_riterator rcbegin() const {
+            return const_riterator(this, false);
+        }
+
+        const_riterator rcend() const {
+            return const_riterator(this, true);
         }
 
         const T& getData() {
@@ -296,7 +195,7 @@ class Tree {
 
         string print() const {
             string output;
-            for(Tree<T>::const_iterator it = cbegin(); it != cend(); ++it) {
+            for(Tree<T>::const_riterator it = rcbegin(); it != rcend(); ++it) {
                 if(it->getParent() != nullptr) {
                     output.append(it->getParent()->getData());
                     output.append("-");
