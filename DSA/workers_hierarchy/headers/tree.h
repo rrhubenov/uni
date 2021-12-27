@@ -32,6 +32,15 @@ class Tree {
             }
         }
 
+        void setHeight(unsigned value) {
+            this->height = value;
+            if(children != nullptr) {
+                for(typename forward_list<Tree*>::iterator it = children->begin(); it != children->end(); ++it) {
+                    (*it)->setHeight(value + 1);
+                }
+            }
+        }
+
         #include "iterators.h"
 
     public:
@@ -46,6 +55,14 @@ class Tree {
                 this->height = this->parent->height + 1;
             }
         };
+
+        Tree(const Tree<T>& r): data(r.getData()), parent(nullptr), children(nullptr) {
+            Tree<T>::const_iterator it = r.cbegin();
+            ++it;
+            for(;it != r.cend(); ++it) {
+                this->insertNode(it->getData(), it->getParent()->getData());
+            }
+        }
 
         void insertNode(const T& toInsert , const T& parent) {
             //TODO: A lot of refactoring is needed
@@ -63,6 +80,7 @@ class Tree {
                 new_parent.addChild(&already_exists);
                 new_parent.increaseSize(1);
                 already_exists.parent = &new_parent;
+                already_exists.setHeight(new_parent.getHeight() + 1);
 
             } catch(runtime_error e) {
                 if(strcmp(e.what(), "Element not found") == 0) {
@@ -125,19 +143,19 @@ class Tree {
         }
 
         riterator rbegin() {
-            return riterator(this, false);
+            return riterator(this);
         }
 
         riterator rend() {
-            return riterator(this, true);
+            return riterator(nullptr);
         }
 
         const_riterator rcbegin() const {
-            return const_riterator(this, false);
+            return const_riterator(this);
         }
 
         const_riterator rcend() const {
-            return const_riterator(this, true);
+            return const_riterator(nullptr);
         }
 
         const T& getData() {
@@ -168,6 +186,10 @@ class Tree {
             return this->parent;
         }
 
+        forward_list<Tree*>* getChildren() const {
+            return this->children;
+        }
+
         bool operator==(Tree other) {
             return data == other.data;
         }
@@ -183,7 +205,7 @@ class Tree {
             if(tree.children != nullptr) {
                 for(typename forward_list<Tree*>::iterator it = tree.children->begin(); it != tree.children->end(); ++it) {
                     (*it)->parent = tree.parent;
-                    (*it)->height -= 1;
+                    (*it)->setHeight((*it)->getHeight() - 1);
                 }
                 tree.parent->children->splice_after(tree.parent->children->cbefore_begin(), *tree.children);
             }
@@ -195,7 +217,7 @@ class Tree {
 
         string print() const {
             string output;
-            for(Tree<T>::const_riterator it = rcbegin(); it != rcend(); ++it) {
+            for(Tree<T>::const_iterator it = cbegin(); it != cend(); ++it) {
                 if(it->getParent() != nullptr) {
                     output.append(it->getParent()->getData());
                     output.append("-");
