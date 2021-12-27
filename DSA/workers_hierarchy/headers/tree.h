@@ -64,6 +64,14 @@ class Tree {
             }
         }
 
+        ~Tree() {
+            if(children != nullptr) {
+                for(typename forward_list<Tree*>::iterator it = children->begin(); it != children->end(); ++it) {
+                    delete (*it);
+                }
+            }
+        }
+
         void insertNode(const T& toInsert , const T& parent) {
             //TODO: A lot of refactoring is needed
             //TODO: If parent does not exists, throw error
@@ -86,7 +94,6 @@ class Tree {
                 if(strcmp(e.what(), "Element not found") == 0) {
                     Tree& tree_parent = search(parent);
                     tree_parent.addChild(new Tree(toInsert, &tree_parent));
-
                     tree_parent.increaseSize(1);
                 } else {
                     throw e;
