@@ -169,8 +169,16 @@ bool Hierarchy::fire(const string& who) {
 
 bool Hierarchy::hire(const string& who, const string& boos) {
     //TODO: return false if can't hire
-    tree.insertNode(who, boos);
-    return true;
+    try {
+        tree.insertNode(who, boos);
+        return true;
+    } catch(runtime_error e) {
+        if(strcmp(e.what(), "Element not found") == 0) {
+            return false;
+        } else {
+            throw e;
+        }
+    }
 }
 
 void Hierarchy::incorporate()  {
