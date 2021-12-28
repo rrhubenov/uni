@@ -32,7 +32,12 @@ public:
 
     Hierarchy join(const Hierarchy& right) const;
 
+    bool modified() const;
+    void modify();
+    void unmodify();
+
     //If you need it - add more public methods here
 private:
     Tree<string> tree = Tree<string>("Uspeshnia", nullptr);
+    bool isModified = false;
 };
