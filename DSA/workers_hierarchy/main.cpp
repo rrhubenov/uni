@@ -1,46 +1,25 @@
+#include "headers/commands.hh"
+#include "headers/interface.h"
 
 #include <iostream>
-#include <fstream>
-#include "headers/interface.h"
 #include <string>
-#include <vector>
-using namespace std;
 
-vector<Hierarchy> hierarchies;
+vector<pair<string, Hierarchy>> hierarchies;
 
-int main() {
-    string command;
-    cin >> command;
-    if(command == "load") {
-        string fName;
-        string hName;
+int main(int argc, char **argv) {
+    CLIController cli_controller;
 
-        cin >> hName >> fName;
+    Help* helpCommand = new Help(&cli_controller);
+    Exit* exitCommand = new Exit();
+    Load* loadCommand = new Load(hierarchies);
+    Save* saveCommand = new Save(hierarchies);
 
-        fstream file;
-        string buffer;
+    cli_controller.register_command(helpCommand);
+    cli_controller.register_command(exitCommand);
+    cli_controller.register_command(loadCommand);
+    cli_controller.register_command(saveCommand);
 
-        file.open("input", ios::in);
-
-        if(file.is_open()) {
-            string line;
-            while(getline(file, line)) {
-                buffer += line;
-                buffer += "\n";
-            }
-
-            file.close();
-            Hierarchy h = Hierarchy(buffer);
-            hierarchies.push_back(h);
-            cout << hierarchies[0].print();
-        } else {
-            cout << "File was not opened" << endl;
-        }
-
-    } else {
-        cout << "unknown command" << endl;
-    }
-
+    cli_controller.begin_reading();
 
     return 0;
 }
