@@ -8,6 +8,17 @@ Hierarchy::Hierarchy(Hierarchy&& r) noexcept: tree(move(r.tree)) {}
 
 Hierarchy::Hierarchy(const Hierarchy& r): tree(Tree<string>(r.tree)) {}
 
+bool Hierarchy::modified() const {
+    return isModified;
+}
+
+void Hierarchy::modify() {
+    this->isModified = true;
+}
+
+void Hierarchy::unmodify() {
+    this->isModified = false;
+}
 
 Hierarchy::Hierarchy(const string& data) {
     //TODO: There can be white spaces around the delim. See tests.cpp line 91
