@@ -64,6 +64,22 @@ class Tree {
             }
         }
 
+        Tree(Tree&& r) noexcept : data(r.data), size(r.size), height(r.height) {
+            parent = r.parent;
+            children = r.children;
+
+            if(children != nullptr) {
+                for(typename forward_list<Tree*>::iterator it = children->begin(); it != children->end(); ++it) {
+                    (*it)->parent = this;
+                }
+            }
+
+            r.children = nullptr;
+            r.parent = nullptr;
+            r.size = 1;
+            r.height = 1;
+        }
+
         ~Tree() {
             if(children != nullptr) {
                 for(typename forward_list<Tree*>::iterator it = children->begin(); it != children->end(); ++it) {

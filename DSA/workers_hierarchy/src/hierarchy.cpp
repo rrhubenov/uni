@@ -4,13 +4,10 @@
 
 using namespace std;
 
-Hierarchy::Hierarchy(Hierarchy&& r) noexcept {
-
-
-}
-
+Hierarchy::Hierarchy(Hierarchy&& r) noexcept: tree(move(r.tree)) {}
 
 Hierarchy::Hierarchy(const Hierarchy& r): tree(Tree<string>(r.tree)) {}
+
 
 Hierarchy::Hierarchy(const string& data) {
     //TODO: There can be white spaces around the delim. See tests.cpp line 91
