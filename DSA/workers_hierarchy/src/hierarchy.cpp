@@ -21,7 +21,6 @@ void Hierarchy::unmodify() {
 }
 
 Hierarchy::Hierarchy(const string& data) {
-    //TODO: There can be white spaces around the delim. See tests.cpp line 91
     //TODO: Clean up code duplication
     string line;
     string delimeter = "-";
@@ -98,8 +97,12 @@ bool Hierarchy::find(const string& name) const {
         try{
             tree.search(name);
             return true;
-        } catch(...) {
-            return false;
+        } catch(runtime_error e) {
+            if(!strcmp(e.what(), "Element not found")) {
+                return false;
+            } else {
+                throw e;
+            }
         }
     }
 }
@@ -123,24 +126,23 @@ int Hierarchy::num_overloaded(int level) const {
 }
 
 string Hierarchy::manager(const string& name) const {
-    for(Tree<string>::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
-        if(it->getData() == name) {
-            if(it->getParent() == nullptr) {
-                return "";
-            } else {
-                return it->getParent()->getData();
-            }
+    try {
+        const Tree<string>& t = tree.search(name);
+        if(t.getParent() == nullptr) {
+            return "";
+        } else {
+            return t.getParent()->getData();
         }
+    } catch(runtime_error _) {
+        return "Not found";
     }
-    // TODO: Should there be exception checking?
-    return "NOT FOUND!";
 }
 
 int Hierarchy::num_subordinates(const string& name) const {
     try {
         const Tree<string>& worker = tree.search(name);
         return worker.children_count();
-    } catch(...) {
+    } catch(runtime_error _) {
         return -1;
     }
 }
@@ -152,7 +154,7 @@ unsigned long Hierarchy::getSalary(const string& who) const {
         unsigned remaining = worker.getSize() - direct_count - 1;
 
         return 500*direct_count + 50*remaining;
-    } catch(...) {
+    } catch(runtime_error _) {
         return -1;
     }
 }
@@ -174,7 +176,6 @@ bool Hierarchy::fire(const string& who) {
 }
 
 bool Hierarchy::hire(const string& who, const string& boos) {
-    //TODO: return false if can't hire
     try {
         tree.insertNode(who, boos);
         return true;

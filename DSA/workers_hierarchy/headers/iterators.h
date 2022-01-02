@@ -44,7 +44,6 @@ public:
     Iterator operator++()
     {
         assert(tree != nullptr);
-        // This typename confuses me quite a bit
         if (tree->children != nullptr)
         {
             tree->children->sort(sort_func);

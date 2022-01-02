@@ -107,4 +107,4 @@ class Tree {
         bool operator!=(Tree& other);
 };
 
-#include "../src/tree.inl"
+#include "../src/tree.inc"

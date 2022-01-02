@@ -89,7 +89,6 @@ Load::Load(vector<pair<string, Hierarchy>>& hierarchies): hierarchies(hierarchie
 string Load::getName() { return "load"; }
 string Load::getDetails() { return "load: read from file/stdin and create a new hierarchy, <hierachy_name, file_name>"; }
 void Load::execute(vector<string> args) {
-    // TODO: Allow read from stdin
     // TODO: Check that object name is correctly named
     string objectName = args[0];
     string buffer;
@@ -129,7 +128,6 @@ Save::Save(vector<pair<string, Hierarchy>>& hierarchies): hierarchies(hierarchie
 string Save::getName() { return "save"; }
 string Save::getDetails() { return "save: write object to a given file/stdout, <hierarchy_name, file_name>"; }
 void Save::execute(vector<string> args) {
-    // TODO: Allow read from stdin
     // TODO: Check that object name is correctly named
     string objectName = args[0];
     string buffer;
