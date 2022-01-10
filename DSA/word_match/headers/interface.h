@@ -1,6 +1,7 @@
 #include <iostream>
 #include <set>
 #include <string>
+#include "hashmap.h"
 
 ///
 /// Represents a multiset of words
@@ -31,6 +32,7 @@ public:
 	std::multiset<std::string> words() const;
 	
 	// You can add additional members if you need to
+	HashMap hm;
 };
 
 ///
