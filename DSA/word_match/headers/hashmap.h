@@ -11,7 +11,7 @@ class HashMap {
 private:
     const unsigned SALT = 211;
 
-    unsigned size, capacity;
+    unsigned uniqueSize, size, capacity;
     forward_list<pair<unsigned, string>>* data;
 
     float load() const;
@@ -27,11 +27,13 @@ public:
 
     HashMap();
     ~HashMap();
+    HashMap(const HashMap& other);
 
     void insert(const string word, const size_t times = 1);
     unsigned find(const string word) const;
     void remove(const string word);
     size_t getSize() const;
+    size_t getUniqueSize() const;
 };
 
 class HashMap::iterator {

@@ -7,17 +7,29 @@ using namespace std;
 
 
 HashMap::iterator HashMap::begin() const {
-    return iterator(&data[0], size);
+    return iterator(&data[0], uniqueSize);
 }
 
 HashMap::iterator HashMap::end() const {
-    return iterator(nullptr, size);
+    return iterator(nullptr, uniqueSize);
 }
 
 HashMap::HashMap() {
+    uniqueSize = 0;
     size = 0;
     capacity = 8;
     data = new forward_list<pair<unsigned, string>>[capacity];
+}
+
+HashMap::HashMap(const HashMap& other) {
+    size = other.size;
+    uniqueSize =other.uniqueSize;
+    capacity = other.capacity;
+    data = new forward_list<pair<unsigned, string>>[capacity];
+
+    for(int i = 0; i < capacity; ++i) {
+        data[i] = other.data[i];
+    }
 }
 
 HashMap::~HashMap() {
@@ -26,7 +38,7 @@ HashMap::~HashMap() {
 
 float HashMap::load() const {
     assert(capacity != 0);
-    return (float) size/ (float) capacity;
+    return (float) uniqueSize/ (float) capacity;
 }
 
 unsigned HashMap::hash(const string word) const {
@@ -43,6 +55,7 @@ unsigned HashMap::hash(const string word) const {
 
 void HashMap::insert(const string word, const size_t times) {
     unsigned hashV = hash(word);
+    size += times;
     forward_list<pair<unsigned, string>>::iterator it = data[hashV].begin();
     for(;it != data[hashV].end(); ++it) {
         if(it->second == word) {
@@ -52,7 +65,7 @@ void HashMap::insert(const string word, const size_t times) {
     }
 
     data[hashV].push_front(make_pair(times, word));
-    size++;
+    uniqueSize++;
 
     if(load() > 0.7) {
         resize(capacity * 2);
@@ -103,4 +116,8 @@ void HashMap::resize(const unsigned newCapacity) {
 
 size_t HashMap::getSize() const {
     return size;
+}
+
+size_t HashMap::getUniqueSize() const {
+    return uniqueSize;
 }
