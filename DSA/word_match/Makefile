@@ -1,5 +1,5 @@
-main: main.o hashmap.o
-	g++ -g -o main -std=c++11 main.o hashmap.o
+main: main.o hashmap.o comparator.o word_multiset.o
+	g++ -g -o main -std=c++11 main.o hashmap.o comparator.o word_multiset.o
 
 run: main
 	./main
@@ -23,7 +23,7 @@ runtests: tests
 	./runtests
 
 tests: test.o comparator.o word_multiset.o hashmap.o
-	g++ -o runtests -std=c++11 test.o comparator.o word_multiset.o hashmap.o
+	g++ -g -o runtests -std=c++11 test.o comparator.o word_multiset.o hashmap.o
 
 test.o: 
-	g++ -c -std=c++11 tests/test.cpp
+	g++ -g -c -std=c++11 tests/test.cpp
