@@ -6,7 +6,7 @@
 using namespace std;
 
 
-HashMap::iterator HashMap::begin() {
+HashMap::iterator HashMap::begin() const {
     return iterator(&data[0], size);
 }
 
@@ -41,17 +41,17 @@ unsigned HashMap::hash(const string word) const {
     return hashV % capacity;
 }
 
-void HashMap::insert(const string word) {
+void HashMap::insert(const string word, const size_t times) {
     unsigned hashV = hash(word);
     forward_list<pair<unsigned, string>>::iterator it = data[hashV].begin();
     for(;it != data[hashV].end(); ++it) {
         if(it->second == word) {
-            it->first++;
+            it->first += times;
             return;
         }
     }
 
-    data[hashV].push_front(make_pair(1, word));
+    data[hashV].push_front(make_pair(times, word));
     size++;
 
     if(load() > 0.7) {
@@ -101,4 +101,6 @@ void HashMap::resize(const unsigned newCapacity) {
 }
 
 
-
+size_t HashMap::getSize() const {
+    return size;
+}
