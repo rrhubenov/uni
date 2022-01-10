@@ -2,6 +2,66 @@
 #include "catch.hpp"
 
 #include "../headers/interface.h"
+#include "../headers/hashmap.h"
+#include <string>
+
+// Custom tests for hashmap implementation
+TEST_CASE("HashMap iterator returns element") {
+	HashMap h;
+	string testString = "test";
+	h.insert(testString);
+
+	for(HashMap::iterator it = h.begin(); it != h.end(); ++it) {
+		REQUIRE((*it).second == testString);
+	}
+}
+
+TEST_CASE("HashMap string count is stored correctly") {
+	HashMap h;
+	string testString = "test";
+	h.insert(testString);
+	h.insert(testString);
+	h.insert(testString);
+
+	for(HashMap::iterator it = h.begin(); it != h.end(); ++it) {
+		REQUIRE((*it).first == 3);
+	}
+}
+
+TEST_CASE("HashMap string is found after inserting a lot of elements") {
+	HashMap h;
+	string toInsert = "test";
+	for(unsigned i = 0; i < 100; ++i) {
+		h.insert(toInsert);
+		toInsert.push_back('a');
+	}
+
+	for(unsigned i = 0; i < 100; ++i) {
+		toInsert.pop_back();
+		REQUIRE(h.find(toInsert) == 1);
+	}
+}
+
+TEST_CASE("HashMap finds correct word count") {
+	HashMap h;
+	string testString = "test";
+	h.insert(testString);
+	h.insert(testString);
+	h.insert(testString);
+
+	REQUIRE(h.find(testString) == 3);
+}
+
+TEST_CASE("HashMap returns 0 if word not found") {
+	HashMap h;
+	string testString = "test";
+	h.insert(testString);
+	h.insert(testString);
+	h.insert(testString);
+
+	REQUIRE(h.find("NoSuchWord") == 0);
+}
+//
 
 SCENARIO("WordsMultiset stores data correctly when adding words consecutively")
 {
