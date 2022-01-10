@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <forward_list>
 #include <string>
@@ -20,29 +22,29 @@ public:
     unsigned hash(const string word) const;
     class iterator;
 
-    iterator begin();
+    iterator begin() const;
     iterator end() const;
 
     HashMap();
     ~HashMap();
 
-    void insert(const string word);
+    void insert(const string word, const size_t times = 1);
     unsigned find(const string word) const;
     void remove(const string word);
+    size_t getSize() const;
 };
 
 class HashMap::iterator {
     private:
-        friend iterator HashMap::begin();
-        friend iterator HashMap::end() const;
-
         unsigned size, count;
         forward_list<pair<unsigned, string>>* bucketPtr;
         forward_list<pair<unsigned, string>>::iterator it; 
     public:
         iterator(forward_list<pair<unsigned, string>>* ptr, const unsigned size): size(size), count(0), bucketPtr(ptr) {
-            // assert(size != 0);
-            if(bucketPtr != nullptr) {
+            if(size == 0) {
+                bucketPtr = nullptr;
+            }
+            else if(bucketPtr != nullptr) {
                 it = bucketPtr->begin();
                 while(it == bucketPtr->end()) {
                     bucketPtr++;
@@ -51,8 +53,8 @@ class HashMap::iterator {
             }
         }
 
-        pair<unsigned, string>& operator*() { return *(it); }
-        pair<unsigned, string>* operator->() { return &(*(it)); }
+        const pair<unsigned, string>& operator*() { return *(it); }
+        const pair<unsigned, string>* operator->() { return &(*(it)); }
 
         iterator& operator++() {
             count++;
