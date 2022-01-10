@@ -15,6 +15,10 @@ size_t WordsMultiset::countOf(const string& word) const {
 }
 
 size_t WordsMultiset::countOfUniqueWords() const {
+    return hm.getUniqueSize();
+}
+
+size_t WordsMultiset::countOfAllWords() const {
     return hm.getSize();
 }
 

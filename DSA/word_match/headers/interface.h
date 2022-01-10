@@ -32,6 +32,7 @@ public:
 	std::multiset<std::string> words() const;
 	
 	// You can add additional members if you need to
+	size_t countOfAllWords() const;
 	HashMap hm;
 };
 
