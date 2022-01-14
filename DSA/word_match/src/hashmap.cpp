@@ -37,7 +37,6 @@ HashMap::~HashMap() {
 }
 
 float HashMap::load() const {
-    assert(capacity != 0);
     return (float) uniqueSize/ (float) capacity;
 }
 
