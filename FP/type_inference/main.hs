@@ -1,4 +1,5 @@
 -- State management
+-- Simple Monad for keeping track of the next type variable we can use
 type State = Char
 newtype ST a = S (State -> (a, State))
 
@@ -34,6 +35,7 @@ fresh :: ST Type
 fresh = S (\c -> (TVar c, succ c))
 --
 
+-- Some algebraic data types for Terms and Types
 data Term
     = Var String
     | App Term Term
@@ -41,7 +43,6 @@ data Term
     deriving (Show, Eq)
 
 data Type
-    -- = TVar String
     = TVar Char
     | Fun Type Type
     deriving (Eq)
@@ -55,6 +56,7 @@ instance Show Type where
 removeFirst [] e = []
 removeFirst (x:xs) e = if x == e then xs else x:removeFirst xs e
 
+-- simple parsing that handles brackets
 parse :: String -> Term
 parse [x] = Var [x]
 parse ('(':xs) = parse (removeFirst xs ')')
@@ -81,6 +83,7 @@ find p (x:xs) = if p x then x else find p xs
 findAssumption :: String -> [Context] -> Type
 findAssumption term ctx = snd $ find (\ (var, ty) -> var == term) ctx
 
+-- find substitution that has to be applied to the given type variable
 findSubstitution :: Char -> [Substitution] -> Type
 findSubstitution term subs = snd $ find (\ (cterm, ctype) -> cterm == term) subs
 
@@ -90,6 +93,7 @@ applySubstitution subst t@(TVar c) = if substitutionExists then findSubstitution
         substitutionExists = any (\(var, ty) -> var == c) subst
 applySubstitution subst (Fun t1 t2) = Fun (applySubstitution subst t1) (applySubstitution subst t2)
 
+-- apply all the substitutions on the given context
 applySubstitutionCtx :: [Substitution] -> [Context] -> [Context]
 applySubstitutionCtx subst = map (\ (var, ty) -> (var, applySubstitution subst ty))
 
@@ -101,11 +105,14 @@ elemSubs sub (s:ss) = (sub `equalSubs` s) || elemSubs sub ss
 
 -- Left biased union of substitutions
 -- Compares based on key
+-- Given two sets of substitution maps we want to preserve information from both of them.
+-- If a substitution of the same type var exists in both we take the left one
 substUnion :: [Substitution] -> [Substitution] -> [Substitution]
 substUnion s1 [] = s1
 substUnion [] s2 = s2
 substUnion s1 (s:ss) = if s `elemSubs` s1 then substUnion s1 ss else substUnion (s:s1) ss
 
+-- apply right substitutions to left substitutions and then union
 composeSubstitutions :: [Substitution] -> [Substitution] -> [Substitution]
 composeSubstitutions s1 s2 = substUnion (reverse (map (\ (tvar, ty) -> (tvar, applySubstitution s1 ty)) s2)) s1
 
@@ -116,12 +123,14 @@ freeTypeVars :: Type -> [Char]
 freeTypeVars (TVar var) = [var]
 freeTypeVars (Fun t1 t2) = uniq $ freeTypeVars t1 ++ freeTypeVars t2
 
+-- create a new substitution based on the given type var and the type that it needs to be substituted to
 varBind :: Char -> Type -> [Substitution]
 varBind var ty
     | ty == TVar var = []
     | var `elem` freeTypeVars ty = error "occurs check"
     | otherwise = [(var, ty)]
 
+-- find a substitution that makes the two types equal 
 unify :: Type -> Type -> [Substitution]
 unify (Fun arg1 res1) (Fun arg2 res2) = composeSubstitutions s1 s2
     where
@@ -132,12 +141,17 @@ unify ty (TVar var) = varBind var ty
 
 infer :: Term -> [Context] -> ST ([Substitution], Type)
 infer (Var var) ctx = return ([], findAssumption var ctx)
+-- infer the type of the body, apply the substitutions that were found to the argument of the lambda
 infer (Lam var body) ctx =
     do
         tyVar <- fresh
         let newctx = (var, tyVar):ctx
         (s1, tyBody) <- infer body newctx
         return (s1, Fun (applySubstitution s1 tyVar) tyBody)
+-- infer the type of the function, infert the type of the argument using the substitutions that were found
+-- unify the function type with tyArg -> tyRes since we know that the function type has to be tyArg -> tyRes
+-- compose all substitutions so we don't lose information
+-- return the subtitutions that were found with the type of the result
 infer (App fun arg) ctx =
     do
         tyRes <- fresh
