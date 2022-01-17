@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "string": "cpp",
+        "forward_list": "cpp",
+        "iosfwd": "cpp",
+        "ostream": "cpp"
+    }
+}

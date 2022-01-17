@@ -1,0 +1,7 @@
+#include <stding.h>
+const uint16_t arr[] = {
+0x6131,
+0x6473,
+0x0a66,
+};
+const uint32_t arrN = 3;
