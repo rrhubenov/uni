@@ -17,10 +17,10 @@ struct Token {
 };
 
 static const string TREAL = "REAL";
-static const string LBRACKET = "LBRACKET";
-static const string RBRACKET = "RBRACKET";
-static const string LSBRACKET = "LSBRACKET";
-static const string RSBRACKET = "RSBRACKET";
+static const string TLBRACKET = "LBRACKET";
+static const string TRBRACKET = "RBRACKET";
+static const string TLSBRACKET = "LSBRACKET";
+static const string TRSBRACKET = "RSBRACKET";
 
 class Lexer {
     private:

@@ -22,13 +22,13 @@ vector<Token> Lexer::tokenize(const string input) const {
         }else if(contains(*it, digits, 10)) {
             result.push_back(tokenizeReal(it));
         } else if(*it == '(') {
-            result.push_back(Token {LBRACKET, "("});
+            result.push_back(Token {TLBRACKET, "("});
         } else if(*it == ')') {
-            result.push_back(Token {RBRACKET, ")"});
+            result.push_back(Token {TRBRACKET, ")"});
         } else if(*it == '[') {
-            result.push_back(Token {LSBRACKET, "["});
+            result.push_back(Token {TLSBRACKET, "["});
         } else if(*it == ']') {
-            result.push_back(Token {RSBRACKET, "]"});
+            result.push_back(Token {TRSBRACKET, "]"});
         } else {
             // TODO: Custom Lexer error
             throw runtime_error("Unknown token");
