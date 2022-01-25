@@ -1,7 +1,7 @@
 ---
 title: "Homework 1"
 author: "Radoslav Hubenov №45708"
-date: "12/8/2021"
+date: "24/01/2022"
 output:
   pdf_document: default
   html_document: default
@@ -15,87 +15,26 @@ attach(survey)
 library(tidyverse)
 ```
 
-# Problem 1
-## A)
-Get the min value of AGE where SEX is "Female".
-```{r}
-min(survey$Age[survey$Sex == "Female"], na.rm=T)
-```
-## B)
-Sort by height and then get the genders of the three highest.
-```{r}
-survey$Sex[sort(survey$Height, decreasing=T)][0:3]
-```
-## V)
-Calculate the mean for the ages where Sex is "Male" and Pusle > 80
-```{r}
-mean(survey$Age[ survey$Sex == "Male" & survey$Pulse > 80], na.rm=T)
-```
-Split the screen, plot the pie on the first screen and plot the boxplot on the second.
-## G)
-```{r pressure}
-split.screen(c(1,2))
-screen(1)
-pie(table(survey$Exer))
-screen(2)
-boxplot(survey$Height)
-```
-
 # Problem 2
-Not sure how to plot the convergence to infinity of a function.
-This gets the values of the function from 1 to 1000, flattens the values into one vector and 
-calculates then plots the cummulative mean as n increases to 1000.
 ```{r}
-f <- function(n = 100) {
-  count = 0
-  for(i in 1:n) {
-    xs = sample(1:10, size=3, replace=T)
-    
-    if((xs[1] + xs[2]) > 2*xs[3]) {
-      count = count + 1
-    }
-  }
-  count / n
-}
+exp4 = morley$Speed[morley$Expt == 4]
+boxplot(exp4)
+hist(exp4)
+qqnorm(exp4)
+qqline(exp4)
+shapiro.test(exp4)
 
-f(100)
-f(1000)
-f(10000)
-
-map(1:1000, ~f()) %>%
-  unlist() %>%
-  cummean() %>%
-  plot(type="l")
-
+t.test(exp4, conf.level = 0.97)
 ```
+### We can conclude the distribution is normal
+### The interval is 789.008 851.992
 
-# Problem 3
-
-
-## A)
-Calculate the amount of values bigger than 3 and divide by the total count.
+# Problem 4
 ```{r}
-count = 1000
-xs = rnorm(count, mean=4, sd=6)
-length(xs[xs > 3]) / 1000
+bites = c(38, 10, 84, 36, 50, 35, 73, 48, 32, 16, 57, 28, 55, 12, 61, 29)
+m = matrix(bites, nrow=2, byrow=T)
+
+res = chisq.test(m)
+res$p.value
 ```
-
-## B)
-65 percent of xs are under the c and 35 percent are over the c.
-```{r}
-c = quantile(xs, probs=0.65)
-```
-
-## V)
-```{r}
-m = median(xs)
-q1 = median(xs[xs < m])
-q3 = median(xs[xs > m])
-m
-q1
-q3
-```
-
-
-
-
+### p-value < 0.05 => we can conclude that there has been a change in the number of bites
