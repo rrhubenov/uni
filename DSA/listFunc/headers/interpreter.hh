@@ -1,8 +1,11 @@
 #pragma once
 #include "parser.hh"
+#include <vector>
+
+using namespace std;
 
 class Interpreter {
 
 public:
-    void eval(Node* ast);
+    string eval(Node* ast);
 };

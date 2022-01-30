@@ -1,6 +1,7 @@
 #include "../headers/interpreter.hh"
 
 
-void Interpreter::eval(Node* ast) {
-    
+string Interpreter::eval(Node* ast) {
+    Value* result = ast->eval();
+    return result->print();
 }

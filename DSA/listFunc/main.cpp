@@ -1,17 +1,27 @@
-#include "headers/lexer.hh"
 #include "headers/parser.hh"
+#include "headers/lexer.hh"
+#include "headers/interpreter.hh"
 #include <iostream>
 
 using namespace std;
 
 int main() {
     string line;
-    Lexer l = Lexer();
-    Parser p = Parser();
+    Lexer l;
+    Interpreter i;
 
+    cout << "> ";
     while(getline(cin, line)) {
-        vector<Token> ts = l.tokenize("[ 42.69 ] (())");
-        Node* ast = p.parse(ts);
+        // Used to determine end of line
+        // Dirty hack, needs to be reworked
+        line = line + ' ';
+        vector<Token> ts = l.tokenize(line);
+        Parser p(ts);
+
+        Node* n = p.parse();
+        cout << i.eval(n) << endl;
+
+        cout << "> ";
     }
 
 
