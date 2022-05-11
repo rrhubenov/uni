@@ -1,11 +1,23 @@
 #include "headers/parser.hh"
 #include "headers/lexer.hh"
 #include "headers/interpreter.hh"
+#include "headers/functions.hh"
+
+#include <unordered_map>
 #include <iostream>
 
 using namespace std;
 
+void addSystemFunctions(unordered_map<string, Node*>& c) {
+    c.insert(make_pair("eq", new FuncEq));
+}
+
+
 int main() {
+    unordered_map<string, Node*> c;
+
+    addSystemFunctions(c);
+
     string line;
     Lexer l;
     Interpreter i;
@@ -19,7 +31,7 @@ int main() {
         Parser p(ts);
 
         Node* n = p.parse();
-        cout << i.eval(n) << endl;
+        cout << i.eval(n, c) << endl;
 
         cout << "> ";
     }
