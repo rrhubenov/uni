@@ -2,6 +2,12 @@
 
 # Text Processing
 
+## Lectures
+    - https://skelet.ludost.net/OS/KN_2018/L2b_shell_intro_01.03.2018.webm
+    - https://skelet.ludost.net/OS/KN_2018/L4b_redirection_pipeline_13.03.2019.webm
+    - https://skelet.ludost.net/OS/KN_2018/L5a_bash_expansions_22.03.2018.webm
+    - https://skelet.ludost.net/OS/KN_2018/L5b_bash_filename_expansion_22.03.2018.webm
+
 ## Commands
     - grep
     - cat
