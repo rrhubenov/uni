@@ -40,3 +40,22 @@
 
 
 ### Stdin , stdout and stderr
+
+ - 0: stdin
+ - 1: stdout
+ - 2: stderr
+
+## AWK
+
+Scripting language specializing in text processing.
+Splits lines into fields (like cut).
+Regex pattern matching (like grep).
+
+Syntax:
+    awk '<program code>' [files..]
+
+
+
+
+
+
